@@ -50,6 +50,7 @@ pipeline {
           [ "$code" = "200" ]
           curl -s http://localhost/ | cmp - index.html
         '''
+        sh 'exit 1'
       }
     }
   }
