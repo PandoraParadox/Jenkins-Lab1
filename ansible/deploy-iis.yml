@@ -1,0 +1,44 @@
+---
+- name: Install IIS and deploy DevOpsLabPortal
+  hosts: windows
+  gather_facts: false
+
+  vars:
+    site_name: DevOpsLabPortal
+    site_root: C:\sites\DevOpsLabPortal
+    site_port: 8080
+
+  tasks:
+    - name: Install IIS
+      ansible.windows.win_feature:
+        name: Web-Server
+        state: present
+        include_sub_features: true
+        include_management_tools: true
+
+    - name: Create website directory
+      ansible.windows.win_file:
+        path: "{{ site_root }}"
+        state: directory
+
+    - name: Copy static website
+      ansible.windows.win_copy:
+        src: "{{ playbook_dir }}\\..\\index.html"
+        dest: "{{ site_root }}\\index.html"
+        backup: true
+
+    - name: Create or update IIS website
+      ansible.windows.win_iis_website:
+        name: "{{ site_name }}"
+        physical_path: "{{ site_root }}"
+        port: "{{ site_port }}"
+        state: started
+
+    - name: Verify website returns HTTP 200
+      ansible.windows.win_uri:
+        url: "http://localhost:{{ site_port }}"
+        return_content: true
+      register: website_response
+      failed_when:
+        - website_response.status_code != 200
+        - "'DevOpsLabPortal' not in website_response.content"
