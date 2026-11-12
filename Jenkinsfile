@@ -1,6 +1,6 @@
 pipeline {
     agent { label 'win-agent' }
-    triggers { cron('*/2 * * * *') }
+    triggers { cron('0 * * * *') }
     options {
         skipDefaultCheckout(true)
         buildDiscarder(logRotator(numToKeepStr: '30'))
